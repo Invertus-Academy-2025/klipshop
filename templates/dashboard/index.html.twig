@@ -3,119 +3,128 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block body %}
-    <div class="dashboard">
-        <div class="sidebar">
-            <div class="user-info">
-                <div class="avatar">
-                    {{ user.email|first|upper }}
-                </div>
-                <div class="user-details">
-                    <h3>{{ user.email }}</h3>
-                    <span class="user-role">User</span>
-                </div>
-            </div>
-            <nav class="dashboard-nav">
-                <a href="{{ path('app_dashboard') }}" class="active">Dashboard</a>
-                <a href="#">Profile</a>
-                <a href="#">Settings</a>
-                <a href="{{ path('app_logout') }}">Logout</a>
-            </nav>
-        </div>
-
-        <main class="main-content">
-            <header class="dashboard-header">
-                <h1>Welcome back!</h1>
-                <p class="current-date">{{ "now"|date("F d, Y") }}</p>
-            </header>
-        </main>
+<div class="min-h-screen bg-gray-50">
+    <!-- Mobile menu button -->
+    <div class="fixed top-4 left-4 z-50 md:hidden">
+        <button id="menuButton" class="p-2 rounded-md bg-gray-800 text-gray-200">
+            <svg id="menuOpenIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg id="menuCloseIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
-    <style>
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
+    <!-- Mobile Sidebar (hidden by default) -->
+    <div id="mobileSidebar" class="fixed inset-0 z-40 hidden">
+        <!-- Overlay -->
+        <div id="overlay" class="absolute inset-0 bg-gray-600 opacity-75"></div>
 
-        .sidebar {
-            width: 250px;
-            background-color: #2c3e50;
-            color: white;
-            padding: 1rem;
-        }
+        <!-- Sidebar -->
+        <div class="relative flex flex-col w-64 h-full bg-gray-800 text-white">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-xl font-semibold">
+                        {{ user.email|first|upper }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-medium truncate">{{ user.email }}</h3>
+                        <p class="text-sm text-gray-400">User</p>
+                    </div>
+                </div>
+            </div>
 
-        .user-info {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 1rem;
-        }
+            <nav class="mt-6 px-4">
+                <div class="space-y-2">
+                    <a href="{{ path('app_dashboard') }}"
+                       class="group flex items-center px-4 py-3 text-sm font-medium rounded-md {% if app.request.get('_route') == 'app_dashboard' %}bg-gray-900 text-white{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">
+                        <svg class="mr-3 h-5 w-5 {% if app.request.get('_route') == 'app_dashboard' %}text-white{% else %}text-gray-400 group-hover:text-white{% endif %}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </a>
 
-        .avatar {
-            width: 50px;
-            height: 50px;
-            background-color: #3498db;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
+                    <a href="{{ path('app_logout') }}"
+                       class="group flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
 
-        .dashboard-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
+    <!-- Desktop Sidebar -->
+    <div class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0">
+        <div class="flex-1 flex flex-col min-h-0 bg-gray-800">
+            <div class="p-6 border-b border-gray-700">
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center text-xl font-semibold text-white">
+                        {{ user.email|first|upper }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-medium text-white truncate">{{ user.email }}</h3>
+                        <p class="text-sm text-gray-400">User</p>
+                    </div>
+                </div>
+            </div>
+            <nav class="mt-6 px-4">
+                <!-- Same navigation content as mobile -->
+                <div class="space-y-2">
+                    <a href="{{ path('app_dashboard') }}"
+                       class="group flex items-center px-4 py-3 text-sm font-medium rounded-md {% if app.request.get('_route') == 'app_dashboard' %}bg-gray-900 text-white{% else %}text-gray-300 hover:bg-gray-700 hover:text-white{% endif %}">
+                        <svg class="mr-3 h-5 w-5 {% if app.request.get('_route') == 'app_dashboard' %}text-white{% else %}text-gray-400 group-hover:text-white{% endif %}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </a>
 
-        .dashboard-nav a {
-            color: white;
-            text-decoration: none;
-            padding: 0.75rem 1rem;
-            border-radius: 4px;
-            transition: background-color 0.3s;
-        }
+                    <a href="{{ path('app_logout') }}"
+                       class="group flex items-center px-4 py-3 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
+                        <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
 
-        .dashboard-nav a:hover,
-        .dashboard-nav a.active {
-            background-color: rgba(255,255,255,0.1);
-        }
+    <!-- Main Content -->
+    <div class="md:pl-64">
+        <div class="py-6 px-8">
+            <header class="mb-8 pt-8 md:pt-0">
+                <h1 class="text-2xl font-semibold text-gray-900">Welcome back!</h1>
+                <p class="mt-1 text-sm text-gray-500">{{ "now"|date("F d, Y") }}</p>
+            </header>
 
-        .main-content {
-            flex: 1;
-            padding: 2rem;
-            background-color: #f5f6fa;
-        }
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <h3 class="text-lg font-medium text-gray-900">Statistics</h3>
+                        <p class="mt-1 text-gray-500">Your activity overview</p>
+                    </div>
+                </div>
 
-        .dashboard-header {
-            margin-bottom: 2rem;
-        }
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <h3 class="text-lg font-medium text-gray-900">Recent Activity</h3>
+                        <p class="mt-1 text-gray-500">Latest updates</p>
+                    </div>
+                </div>
 
-        .current-date {
-            color: #666;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .stat-card {
-            background-color: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .stat-card h3 {
-            margin: 0 0 0.5rem 0;
-            color: #2c3e50;
-        }
-
-        .stat-card p {
-            margin: 0;
-            font-size: 1.1rem;
-            color: #666;
-        }
-    </style>
+                <div class="bg-white overflow-hidden shadow rounded-lg">
+                    <div class="p-5">
+                        <h3 class="text-lg font-medium text-gray-900">Tasks</h3>
+                        <p class="mt-1 text-gray-500">Your pending tasks</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
