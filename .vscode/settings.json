@@ -1,0 +1,8 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#18256E",
+    "titleBar.activeBackground": "#22349A",
+    "titleBar.activeForeground": "#FAFAFE"
+  },
+  "recommendations": ["whatwedo.twig", "bmewburn.vscode-intelephense-client"]
+}
