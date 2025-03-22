@@ -31,6 +31,7 @@ class BestSellingProduct
         return $this->id;
     }
 
+    //Product id from prestashop
     public function getProductId(): ?int
     {
         return $this->productId;
