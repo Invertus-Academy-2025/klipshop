@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\BestSellingProductRepository;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class ProductsController extends AbstractController
 {
@@ -24,5 +26,13 @@ class ProductsController extends AbstractController
             'products' => $products
         ]);
 
+    }
+
+    #[Route('/api/products', name: 'api_products')]
+    public function apiProducts(SerializerInterface $serializer): Response
+    {
+        $products = $this->productRepository->findAll();
+        $jsonContent = $serializer->serialize($products, 'json');
+        return JsonResponse::fromJsonString($jsonContent);
     }
 }
