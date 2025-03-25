@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\BestSellingProductRepository;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class ProductsController extends AbstractController
 {
@@ -35,4 +36,23 @@ class ProductsController extends AbstractController
         $jsonContent = $serializer->serialize($products, 'json');
         return JsonResponse::fromJsonString($jsonContent);
     }
+
+    #[Route('/api/products/save', name: 'api_products_save', methods: ['POST'])]
+    public function apiProductsSave(Request $request): Response
+    {
+        $product_data = json_decode($request->getContent(), true);
+
+        $fields = ['productId', 'name', 'totalSOld'];
+
+        foreach ($fields as $field) {
+            if (empty($product_data[$field])) {
+                return new JsonResponse(['error' => 'Field "' . $field . '" is required.'], Response::HTTP_BAD_REQUEST);
+            }
+        }
+        $product_data['synced_at'] = (new \DateTime())->format('Y-m-d H:i:s');
+
+        return new JsonResponse('Success', 200);
+    }
+
+
 }
