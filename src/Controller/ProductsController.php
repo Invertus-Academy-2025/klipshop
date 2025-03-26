@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Entity\BestSellingProduct;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -9,14 +11,17 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Repository\BestSellingProductRepository;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductsController extends AbstractController
 {
     private $productRepository;
+    private $entityManager;
 
-    public function __construct(BestSellingProductRepository $productRepository)
+    public function __construct(BestSellingProductRepository $productRepository, EntityManagerInterface $entityManager)
     {
         $this->productRepository = $productRepository;
+        $this->entityManager = $entityManager;
     }
 
     #[Route('/products', name: 'products')]
@@ -38,21 +43,29 @@ class ProductsController extends AbstractController
     }
 
     #[Route('/api/products/save', name: 'api_products_save', methods: ['POST'])]
-    public function apiProductsSave(Request $request): Response
+    public function apiProductsSave(Request $request, ValidatorInterface $validator, SerializerInterface $serializer): Response
     {
         $product_data = json_decode($request->getContent(), true);
 
-        $fields = ['productId', 'name', 'totalSOld'];
+        $product = new BestSellingProduct();
 
-        foreach ($fields as $field) {
-            if (empty($product_data[$field])) {
-                return new JsonResponse(['error' => 'Field "' . $field . '" is required.'], Response::HTTP_BAD_REQUEST);
-            }
+        $product->setProductId($product_data['productId']);
+        $product->setName($product_data['name']);
+        $product->setTotalSold($product_data['totalSold']);
+        $product->setSyncedAt(new \DateTime());
+
+
+        $errors = $validator->validate($product);
+
+        if (count($errors) > 0) {
+            $jsonContent = $serializer->serialize($errors, 'json');
+            return JsonResponse::fromJsonString($jsonContent, Response::HTTP_BAD_REQUEST);
         }
-        $product_data['synced_at'] = (new \DateTime())->format('Y-m-d H:i:s');
 
-        return new JsonResponse('Success', 200);
+        $this->entityManager->persist($product);
+        $this->entityManager->flush();
+
+        return new JsonResponse('Success', Response::HTTP_CREATED);
     }
-
 
 }
