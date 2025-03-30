@@ -33,6 +33,14 @@ class ProductsController extends AbstractController
         ]);
 
     }
+    #[Route('/product/{id}/delete', name: 'product_delete')]
+    public function productDelete($id): Response
+    {
+        $product = $this->productRepository->find($id);
+        $this->entityManager->remove($product);
+        $this->entityManager->flush();
+        return $this->redirectToRoute('products');
+    }
 
     #[Route('/api/products', name: 'api_products')]
     public function apiProducts(SerializerInterface $serializer): Response
@@ -47,13 +55,18 @@ class ProductsController extends AbstractController
     {
         $product_data = json_decode($request->getContent(), true);
 
-        $product = new BestSellingProduct();
+        $product = $this->entityManager->getRepository(BestSellingProduct::class)
+            ->findOneBy(['productId' => $product_data['productId']]);
 
-        $product->setProductId($product_data['productId']);
+        if (!$product) {
+            $product = new BestSellingProduct();
+            $product->setProductId($product_data['productId']);
+
+        }
+
         $product->setName($product_data['name']);
         $product->setTotalSold($product_data['totalSold']);
         $product->setSyncedAt(new \DateTime());
-
 
         $errors = $validator->validate($product);
 
