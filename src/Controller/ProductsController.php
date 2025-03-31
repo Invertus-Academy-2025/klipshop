@@ -29,11 +29,24 @@ class ProductsController extends AbstractController
     {
         $products = $this->productRepository->findAll();
 
+        $latestProducts = [];
+
+        foreach ($products as $product) {
+            $productId = $product->getProductId();
+            $syncedAt = $product->getSyncedAt();
+
+            if (!isset($latestProducts[$productId]) ||
+            $syncedAt > $latestProducts[$productId]->getSyncedAt()) {
+                $latestProducts[$productId] = $product;
+            }
+        }
+
+        $products = array_values($latestProducts);
 
         return $this->render('products/index.html.twig', [
             'products' => $products
-        ]);
 
+        ]);
     }
     #[Route('/product/{id}/delete', name: 'product_delete')]
     public function productDelete($id): Response
