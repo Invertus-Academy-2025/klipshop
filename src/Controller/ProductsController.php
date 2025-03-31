@@ -28,6 +28,8 @@ class ProductsController extends AbstractController
     public function products(): Response
     {
         $products = $this->productRepository->findAll();
+
+
         return $this->render('products/index.html.twig', [
             'products' => $products
         ]);
@@ -63,15 +65,10 @@ class ProductsController extends AbstractController
 
         foreach ($products_data as $product_data) {
 
-            $product = $this->entityManager->getRepository(BestSellingProduct::class)
-                ->findOneBy(['productId' => $product_data['productId']]);
 
-            if (!$product) {
-                $product = new BestSellingProduct();
-                $product->setProductId($product_data['productId']);
+            $product = new BestSellingProduct();
 
-            }
-
+            $product->setProductId($product_data['productId']);
             $product->setName($product_data['name']);
             $product->setTotalSold($product_data['totalSold']);
             $product->setSyncedAt(new \DateTime());
