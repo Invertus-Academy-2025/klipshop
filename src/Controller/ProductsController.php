@@ -39,6 +39,7 @@ class ProductsController extends AbstractController
         $product = $this->productRepository->find($id);
         $this->entityManager->remove($product);
         $this->entityManager->flush();
+
         return $this->redirectToRoute('products');
     }
 
@@ -47,35 +48,44 @@ class ProductsController extends AbstractController
     {
         $products = $this->productRepository->findAll();
         $jsonContent = $serializer->serialize($products, 'json');
+
         return JsonResponse::fromJsonString($jsonContent);
     }
 
     #[Route('/api/products/save', name: 'api_products_save', methods: ['POST'])]
     public function apiProductsSave(Request $request, ValidatorInterface $validator, SerializerInterface $serializer): Response
     {
-        $product_data = json_decode($request->getContent(), true);
+        $products_data = json_decode($request->getContent(), true);
 
-        $product = $this->entityManager->getRepository(BestSellingProduct::class)
-            ->findOneBy(['productId' => $product_data['productId']]);
-
-        if (!$product) {
-            $product = new BestSellingProduct();
-            $product->setProductId($product_data['productId']);
-
+        if(isset($products_data['productId'])) {
+            $products_data = [$products_data];
         }
 
-        $product->setName($product_data['name']);
-        $product->setTotalSold($product_data['totalSold']);
-        $product->setSyncedAt(new \DateTime());
+        foreach ($products_data as $product_data) {
 
-        $errors = $validator->validate($product);
+            $product = $this->entityManager->getRepository(BestSellingProduct::class)
+                ->findOneBy(['productId' => $product_data['productId']]);
 
-        if (count($errors) > 0) {
-            $jsonContent = $serializer->serialize($errors, 'json');
-            return JsonResponse::fromJsonString($jsonContent, Response::HTTP_BAD_REQUEST);
+            if (!$product) {
+                $product = new BestSellingProduct();
+                $product->setProductId($product_data['productId']);
+
+            }
+
+            $product->setName($product_data['name']);
+            $product->setTotalSold($product_data['totalSold']);
+            $product->setSyncedAt(new \DateTime());
+
+            $errors = $validator->validate($product);
+
+            if (count($errors) > 0) {
+                $jsonContent = $serializer->serialize($errors, 'json');
+                return JsonResponse::fromJsonString($jsonContent, Response::HTTP_BAD_REQUEST);
+            }
+
+            $this->entityManager->persist($product);
+
         }
-
-        $this->entityManager->persist($product);
         $this->entityManager->flush();
 
         return new JsonResponse('Success', Response::HTTP_CREATED);
