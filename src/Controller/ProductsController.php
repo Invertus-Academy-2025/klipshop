@@ -45,7 +45,6 @@ class ProductsController extends AbstractController
 
         return $this->render('products/index.html.twig', [
             'products' => $products
-
         ]);
     }
     #[Route('/product/{id}/delete', name: 'product_delete')]
