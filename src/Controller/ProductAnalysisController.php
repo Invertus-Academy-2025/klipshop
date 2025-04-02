@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\BestSellingProductRepository;
 use App\Service\AIService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,15 +14,18 @@ class ProductAnalysisController extends AbstractController
     private $aiService;
 
     public function __construct(
-        AIService $aiService
+        AIService $aiService,
+        BestSellingProductRepository $repository
     ) {
         $this->aiService = $aiService;
+        $this->repository = $repository;
     }
 
     #[Route('/api/products/analyze', name: 'analyze_product', methods: ['GET'])]
     public function analyzeProduct(Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+//        $data = json_decode($request->getContent(), true);
+
 
         if (!isset($data['product']) || !is_array($data['product'])) {
             return $this->json(['error' => 'Invalid product data provided'], 400);
