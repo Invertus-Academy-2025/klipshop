@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\BestSellingProduct;
+use App\Service\AIService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,10 +19,11 @@ class ProductsController extends AbstractController
     private $productRepository;
     private $entityManager;
 
-    public function __construct(BestSellingProductRepository $productRepository, EntityManagerInterface $entityManager)
+    public function __construct(BestSellingProductRepository $productRepository, EntityManagerInterface $entityManager, AIService $aiService)
     {
         $this->productRepository = $productRepository;
         $this->entityManager = $entityManager;
+        $this->aiService = $aiService;
     }
 
     #[Route('/products', name: 'products')]
@@ -43,6 +45,7 @@ class ProductsController extends AbstractController
 
         $products = array_values($latestProducts);
 
+        dd($this->aiService->analyzeProduct($products));
         return $this->render('products/index.html.twig', [
             'products' => $products
         ]);

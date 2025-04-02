@@ -11,17 +11,11 @@ use Symfony\Component\Routing\Annotation\Route;
 class ProductAnalysisController extends AbstractController
 {
     private $aiService;
-    private $shopUrl;
-    private $openaiApiKey;
 
     public function __construct(
-        AIService $aiService,
-        string $shopUrl,
-        string $openaiApiKey
+        AIService $aiService
     ) {
         $this->aiService = $aiService;
-        $this->shopUrl = $shopUrl;
-        $this->openaiApiKey = $openaiApiKey;
     }
 
     #[Route('/api/products/analyze', name: 'analyze_product', methods: ['GET'])]

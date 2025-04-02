@@ -2,17 +2,18 @@
 
 namespace App\Service;
 
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AIService
 {
-    private $apiKey;
     private $httpClient;
+    private ParameterBagInterface $parameterBag;
 
-    public function __construct(string $apiKey, HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient, ParameterBagInterface $parameterBag)
     {
-        $this->apiKey = $apiKey;
         $this->httpClient = $httpClient;
+        $this->parameterBag = $parameterBag;
     }
 
     public function analyzeProduct(array $productData): array
@@ -23,10 +24,11 @@ class AIService
 
         $prompt = 'Analyze this product and provide insights: ' . json_encode($productData);
 
+        $apiKey = $this->parameterBag->get('OPENAI_API_KEY');
         try {
             $response = $this->httpClient->request('POST', 'https://api.openai.com/v1/chat/completions', [
                 'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
