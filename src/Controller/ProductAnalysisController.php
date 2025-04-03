@@ -5,8 +5,7 @@ namespace App\Controller;
 use App\Repository\BestSellingProductRepository;
 use App\Service\AIService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ProductAnalysisController extends AbstractController
@@ -22,18 +21,37 @@ class ProductAnalysisController extends AbstractController
     }
 
     #[Route('/api/products/analyze', name: 'analyze_product', methods: ['GET'])]
-    public function analyzeProduct(Request $request): JsonResponse
+    public function analyzeProduct(): Response
     {
-//        $data = json_decode($request->getContent(), true);
+        $data = $this->repository->findAll();
+        $data = array_map(function ($product) {
+            return [
+                'productId' => $product->getProductId(),
+                'name' => $product->getName(),
+                'synced_at' => $product->getSyncedAt(),
+                'totalSold' => $product->getTotalSold()
+            ];
+        }, $data);
 
-
-        if (!isset($data['product']) || !is_array($data['product'])) {
-            return $this->json(['error' => 'Invalid product data provided'], 400);
+        if (!is_array($data)) {
+            return $this->json(['error' => 'Invalid product type provided'], 400);
         }
 
-        $analysis = $this->aiService->analyzeProduct($data['product']);
+        $analysis = $this->aiService->analyzeProduct($data);
 
-        return $this->json($analysis);
+        if (!$analysis['success']) {
+            return new Response('Request failed', 400);
+        }
+
+        $products = json_decode($analysis['analysis'], true);
+
+        if (!is_array($products)) {
+            return new Response('Invalid product type provided', 400);
+        }
+
+        return $this->render('products/analytics.html.twig', [
+            'products' => $products
+        ]);
     }
 }
 

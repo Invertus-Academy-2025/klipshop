@@ -1,0 +1,21 @@
+{% if products is not empty %}
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th><th>Name</th><th>Synced At</th><th>Reason</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for product in products %}
+            <tr>
+                <td>{{ product.productId }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.recommended_synced_at|date('Y-m-d H:i') }}</td>
+                <td>{{ product.reason }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No recommendations available.</p>
+{% endif %}

@@ -45,7 +45,6 @@ class ProductsController extends AbstractController
 
         $products = array_values($latestProducts);
 
-        dd($this->aiService->analyzeProduct($products));
         return $this->render('products/index.html.twig', [
             'products' => $products
         ]);
