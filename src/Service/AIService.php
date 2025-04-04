@@ -35,16 +35,21 @@ class AIService
         - totalSold (number of units sold)
 
         Task:
-        1. Find products that have the same product_id but different synced_at values (i.e., restocked at different times).
-        2. Analyze how often the product gets restocked (based on synced_at).
+        1. Find products that have the same productId but different synced_at values (i.e., restocked at different times).
+        2. Analyze how often the product gets sold (based on synced_at).
         3. Compare total_sold values for each restocking instance.
-        4. Based on this data, suggest which instance of the product is performing best and whether it should be restocked again.
+        4. If you see same products with same ID sum their totalSold values for analysis
+        5. Based on this data, suggest which instance of the product is performing best and why it should be restocked again.
+        6. Suggest recommendations and how to increase these product sales.
 
         ❗Important:
-         - Analyze the actual data.
+        - Analyze the actual data.
         - Do not return example code.
         - Do not invent data.
         - Respond with a valid **JSON array** of real recommendations based on this data, like:
+        - Return only 3 best products to restock.
+        - Reason should be a sentence.
+
 
         Do not return example code. Analyze the data now and return an array with actual recommendations based on the data provided.
         Return only a valid JSON array of recommendations, with this format:
@@ -52,14 +57,20 @@ class AIService
     [
         'productId': 123,
         'name' => 'Mug The adventure begins',
-        'recommended_synced_at': '2024-03-01T10:00:00Z',
-        'reason': 'Best performance'
+        'synced_at': '2024-03-01T10:00:00Z',
+        'reason': 'Best perfomance',
+        'totalSold': 100,
+        'place': 1,
+        'suggestion': 'Improve marketing'
         ],
         [
         'productId': 456,
         'name' => 'Hummingbird printed t-shirt',
-        'recommended_synced_at' => '2024-02-20T14:30:00Z',
-        'reason': 'Consistent seller'
+        'synced_at' => '2024-02-20T14:30:00Z',
+        'reason': 'Consistent seller',
+        'totalSold': 10,
+        'place': 2,
+        'suggestion': 'Make a discount codes'
        ],
        ...
     ]";
@@ -78,7 +89,7 @@ class AIService
                         ['role' => 'system', 'content' => 'You are a product analysis assistant.'],
                         ['role' => 'user', 'content' => $prompt],
                     ],
-                    'temperature' => 0.1,
+                    'temperature' => 0.2,
                     'max_tokens' => 500,
                 ],
             ]);

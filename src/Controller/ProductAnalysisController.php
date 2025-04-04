@@ -20,7 +20,7 @@ class ProductAnalysisController extends AbstractController
         $this->repository = $repository;
     }
 
-    #[Route('/api/products/analyze', name: 'analyze_product', methods: ['GET'])]
+    #[Route('/api/products/analyze', name: 'analyze_products', methods: ['GET'])]
     public function analyzeProduct(): Response
     {
         $data = $this->repository->findAll();
@@ -33,24 +33,29 @@ class ProductAnalysisController extends AbstractController
             ];
         }, $data);
 
-        if (!is_array($data)) {
-            return $this->json(['error' => 'Invalid product type provided'], 400);
-        }
-
         $analysis = $this->aiService->analyzeProduct($data);
 
         if (!$analysis['success']) {
-            return new Response('Request failed', 400);
+            return $this->render('product/analytics.html.twig', [
+                'products' => [],
+                'error' => 'AI analysis request failed.'
+            ]);
         }
 
-        $products = json_decode($analysis['analysis'], true);
+        $rawJson = $analysis['analysis'];
+        $clean = preg_replace('/```json|```/', '', $rawJson);
+        $products = json_decode(trim($clean), true);
 
         if (!is_array($products)) {
-            return new Response('Invalid product type provided', 400);
+            return $this->render('product/analytics.html.twig', [
+                'products' => [],
+                'error' => 'Invalid product data type received from analysis'
+            ]);
         }
 
         return $this->render('products/analytics.html.twig', [
-            'products' => $products
+            'products' => $products,
+            'error' => null
         ]);
     }
 }
