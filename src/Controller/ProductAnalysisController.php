@@ -36,7 +36,7 @@ class ProductAnalysisController extends AbstractController
         $analysis = $this->aiService->analyzeProduct($data);
 
         if (!$analysis['success']) {
-            return $this->render('product/analytics.html.twig', [
+            return $this->render('products/analytics.html.twig', [
                 'products' => [],
                 'error' => 'AI analysis request failed.'
             ]);
@@ -47,7 +47,7 @@ class ProductAnalysisController extends AbstractController
         $products = json_decode(trim($clean), true);
 
         if (!is_array($products)) {
-            return $this->render('product/analytics.html.twig', [
+            return $this->render('products/analytics.html.twig', [
                 'products' => [],
                 'error' => 'Invalid product data type received from analysis'
             ]);
