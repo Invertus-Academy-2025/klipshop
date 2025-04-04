@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\BestSellingProduct;
-use App\Service\AIService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,15 +15,10 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductsController extends AbstractController
 {
-    private $productRepository;
-    private $entityManager;
-
-    public function __construct(BestSellingProductRepository $productRepository, EntityManagerInterface $entityManager, AIService $aiService)
-    {
-        $this->productRepository = $productRepository;
-        $this->entityManager = $entityManager;
-        $this->aiService = $aiService;
-    }
+    public function __construct(
+        private BestSellingProductRepository $productRepository,
+        private EntityManagerInterface $entityManager,
+    ){}
 
     #[Route('/products', name: 'products')]
     public function products(): Response

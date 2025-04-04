@@ -10,15 +10,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ProductAnalysisController extends AbstractController
 {
-    private $aiService;
-
     public function __construct(
-        AIService $aiService,
-        BestSellingProductRepository $repository
-    ) {
-        $this->aiService = $aiService;
-        $this->repository = $repository;
-    }
+        private AIService $aiService,
+        private BestSellingProductRepository $repository
+    ) {}
 
     #[Route('/api/products/analyze', name: 'analyze_products', methods: ['GET'])]
     public function analyzeProduct(): Response

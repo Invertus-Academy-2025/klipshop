@@ -7,14 +7,10 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class AIService
 {
-    private $httpClient;
-    private ParameterBagInterface $parameterBag;
-
-    public function __construct(HttpClientInterface $httpClient, ParameterBagInterface $parameterBag)
-    {
-        $this->httpClient = $httpClient;
-        $this->parameterBag = $parameterBag;
-    }
+    public function __construct(
+        private HttpClientInterface $httpClient,
+        private ParameterBagInterface $parameterBag
+    ){}
 
     public function analyzeProduct(array $productData): array
     {
@@ -42,7 +38,7 @@ class AIService
         5. Based on this data, suggest which instance of the product is performing best and why it should be restocked again.
         6. Suggest recommendations and how to increase these product sales.
 
-        ❗Important:
+        Important:
         - Analyze the actual data.
         - Do not return example code.
         - Do not invent data.
@@ -56,7 +52,7 @@ class AIService
 [
     [
         'productId': 123,
-        'name' => 'Mug The adventure begins',
+        'name': 'Mug The adventure begins',
         'synced_at': '2024-03-01T10:00:00Z',
         'reason': 'Best perfomance',
         'totalSold': 100,
@@ -65,8 +61,8 @@ class AIService
         ],
         [
         'productId': 456,
-        'name' => 'Hummingbird printed t-shirt',
-        'synced_at' => '2024-02-20T14:30:00Z',
+        'name': 'Hummingbird printed t-shirt',
+        'synced_at': '2024-02-20T14:30:00Z',
         'reason': 'Consistent seller',
         'totalSold': 10,
         'place': 2,
