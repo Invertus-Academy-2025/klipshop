@@ -2,40 +2,56 @@
 
 namespace App\Controller;
 
+use App\Repository\BestSellingProductRepository;
 use App\Service\AIService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 class ProductAnalysisController extends AbstractController
 {
-    private $aiService;
-    private $shopUrl;
-    private $openaiApiKey;
-
     public function __construct(
-        AIService $aiService,
-        string $shopUrl,
-        string $openaiApiKey
-    ) {
-        $this->aiService = $aiService;
-        $this->shopUrl = $shopUrl;
-        $this->openaiApiKey = $openaiApiKey;
-    }
+        private AIService $aiService,
+        private BestSellingProductRepository $repository
+    ) {}
 
-    #[Route('/api/products/analyze', name: 'analyze_product', methods: ['GET'])]
-    public function analyzeProduct(Request $request): JsonResponse
+    #[Route('/api/products/analyze', name: 'analyze_products', methods: ['GET'])]
+    public function analyzeProduct(): Response
     {
-        $data = json_decode($request->getContent(), true);
+        $data = $this->repository->findAll();
+        $data = array_map(function ($product) {
+            return [
+                'productId' => $product->getProductId(),
+                'name' => $product->getName(),
+                'synced_at' => $product->getSyncedAt(),
+                'totalSold' => $product->getTotalSold()
+            ];
+        }, $data);
 
-        if (!isset($data['product']) || !is_array($data['product'])) {
-            return $this->json(['error' => 'Invalid product data provided'], 400);
+        $analysis = $this->aiService->analyzeProduct($data);
+
+        if (!$analysis['success']) {
+            return $this->render('products/analytics.html.twig', [
+                'products' => [],
+                'error' => 'AI analysis request failed.'
+            ]);
         }
 
-        $analysis = $this->aiService->analyzeProduct($data['product']);
+        $rawJson = $analysis['analysis'];
+        $clean = preg_replace('/```json|```/', '', $rawJson);
+        $products = json_decode(trim($clean), true);
 
-        return $this->json($analysis);
+        if (!is_array($products)) {
+            return $this->render('products/analytics.html.twig', [
+                'products' => [],
+                'error' => 'Invalid product data type received from analysis'
+            ]);
+        }
+
+        return $this->render('products/analytics.html.twig', [
+            'products' => $products,
+            'error' => null
+        ]);
     }
 }
 
