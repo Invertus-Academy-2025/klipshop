@@ -47,8 +47,14 @@ class ProductsController extends AbstractController
     public function productDelete($id): Response
     {
         $product = $this->productRepository->find($id);
+        
+        if (!$product) {
+            throw $this->createNotFoundException('Product not found');
+        }
+
         $this->entityManager->remove($product);
         $this->entityManager->flush();
+        $this->entityManager->clear();
 
         return $this->redirectToRoute('products');
     }
