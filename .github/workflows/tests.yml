@@ -50,10 +50,15 @@ jobs:
       - name: Create .env.local
         run: |
           echo "APP_ENV=test" > .env.local
-          echo "DATABASE_URL=mysql://symfony:symfony@127.0.0.1:3306/symfony" >> .env.local
+          echo "DATABASE_URL=mysql://root:root@127.0.0.1:3306/symfony" >> .env.local
 
       - name: Create database
         run: php bin/console doctrine:database:create --if-not-exists
+
+      - name: Update .env.local for migrations
+        run: |
+          echo "APP_ENV=test" > .env.local
+          echo "DATABASE_URL=mysql://symfony:symfony@127.0.0.1:3306/symfony" >> .env.local
 
       - name: Run migrations
         run: php bin/console doctrine:migrations:migrate --no-interaction
